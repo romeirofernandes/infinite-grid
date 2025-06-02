@@ -1,22 +1,19 @@
 import React from "react";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { ThemeToggle } from "./components/ThemeToggle";
 import StickerGrid from "./components/StickerGrid";
 
 const App = () => (
-  <ThemeProvider>
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] transition-colors">
-      <header className="flex justify-between items-center px-4 py-4 max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold font-dm-sans tracking-tight">
-          Infinite Sticker Grid
-        </h1>
-        <ThemeToggle />
+    <div className="min-h-screen bg-[#fafafa]">
+      <header className="fixed top-0 left-0 w-full z-20 flex justify-center pointer-events-none">
+        <div className="flex items-center gap-4 bg-white/80 rounded-b-xl px-6 py-3 mt-2 shadow-lg pointer-events-auto">
+          <h1 className="text-2xl font-bold font-dm-sans tracking-tight text-center">
+            Infinite Sticker Grid
+          </h1>
+        </div>
       </header>
       <main>
         <StickerGrid />
       </main>
     </div>
-  </ThemeProvider>
-);
+  );
 
 export default App;
