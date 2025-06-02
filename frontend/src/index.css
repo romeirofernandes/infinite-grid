@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@fontsource/dm-sans";
+@import "@fontsource/inter";
+
+@variant dark (.dark &);
+
+@theme {
+  --color-primary: #18181b;
+  --color-secondary: #f4f4f5;
+  --color-background-light: #fafafa;
+  --color-background-dark: #09090b;
+  --color-text-light: #18181b;
+  --color-text-dark: #fafafa;
+
+  --font-family-dm-sans: "DM Sans", sans-serif;
+  --font-family-inter: "Inter", sans-serif;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+  @apply bg-[#fafafa] text-[#18181b] dark:bg-[#09090b] dark:text-[#fafafa];
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "DM Sans", sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
