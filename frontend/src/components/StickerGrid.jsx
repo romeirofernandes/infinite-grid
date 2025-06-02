@@ -223,17 +223,17 @@ export default function StickerGrid() {
           } else {
             setToast("Failed to copy image");
           }
-          setTimeout(() => setToast(null), 1500);
+          clearToast();
         }, "image/png");
       };
 
       img.onerror = () => {
         setToast("Failed to copy image");
-        setTimeout(() => setToast(null), 1500);
+        clearToast();
       };
     } catch (e) {
       setToast("Failed to copy image");
-      setTimeout(() => setToast(null), 1500);
+      clearToast();
     }
   };
 
