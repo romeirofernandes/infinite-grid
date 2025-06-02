@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { useState as useToastState } from "react";
 
 const IMAGES = [
   "WhatsApp Image 2025-06-02 at 16.20.28.jpeg",
@@ -162,11 +163,30 @@ export default function StickerGrid() {
 
   // Generate positions for visible images in a grid
   const images = [];
+  const placed = {}; // key: `${col},${row}` -> idx
+
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const gridX = startCol + col;
       const gridY = startRow + row;
-      const idx = pseudoRandom(gridX, gridY);
+
+      // Collect indices of neighbors
+      const neighborIdxs = new Set();
+      if (col > 0) neighborIdxs.add(placed[`${col - 1},${row}`]);
+      if (row > 0) neighborIdxs.add(placed[`${col},${row - 1}`]);
+      if (col > 0 && row > 0) neighborIdxs.add(placed[`${col - 1},${row - 1}`]);
+      if (col > 0 && row < rows - 1)
+        neighborIdxs.add(placed[`${col - 1},${row + 1}`]);
+
+      // Try to pick an image index not used by neighbors, fallback to any if needed
+      let idx = pseudoRandom(gridX, gridY);
+      let tries = 0;
+      while (neighborIdxs.has(idx) && tries < IMAGES.length) {
+        idx = (idx + 1) % IMAGES.length;
+        tries++;
+      }
+      placed[`${col},${row}`] = idx;
+
       images.push({
         x: gridX * CELL_SIZE + GAP / 2,
         y: gridY * CELL_SIZE + GAP / 2,
@@ -176,8 +196,45 @@ export default function StickerGrid() {
     }
   }
 
-  const handleCopy = (src) => {
-    navigator.clipboard.writeText(window.location.origin + src);
+  const [toast, setToast] = useToastState(null);
+
+  const handleCopy = async (src) => {
+    try {
+      // Create an image element
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.src = src;
+
+      img.onload = async () => {
+        // Create a canvas and draw the image
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        // Convert canvas to blob
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            await navigator.clipboard.write([
+              new window.ClipboardItem({ [blob.type]: blob }),
+            ]);
+            setToast("Image copied!");
+          } else {
+            setToast("Failed to copy image");
+          }
+          setTimeout(() => setToast(null), 1500);
+        }, "image/png");
+      };
+
+      img.onerror = () => {
+        setToast("Failed to copy image");
+        setTimeout(() => setToast(null), 1500);
+      };
+    } catch (e) {
+      setToast("Failed to copy image");
+      setTimeout(() => setToast(null), 1500);
+    }
   };
 
   return (
@@ -223,6 +280,57 @@ export default function StickerGrid() {
           />
         ))}
       </div>
+
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 40,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(255,255,255,0.95)",
+            color: "#18181b",
+            padding: "14px 32px",
+            borderRadius: 16,
+            fontSize: 17,
+            fontWeight: 500,
+            zIndex: 9999,
+            boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)",
+            border: "1px solid #e5e7eb",
+            backdropFilter: "blur(4px)",
+            pointerEvents: "none",
+            fontFamily: "DM Sans, sans-serif",
+            letterSpacing: "-0.01em",
+            opacity: toast ? 1 : 0,
+            transition:
+              "opacity 0.4s cubic-bezier(.4,0,.2,1), transform 0.4s cubic-bezier(.4,0,.2,1)",
+            transform: toast
+              ? "translateX(-50%) translateY(0)"
+              : "translateX(-50%) translateY(40px)",
+          }}
+          className="toast-anim"
+        >
+          {toast}
+          <style>
+            {`
+        .toast-anim {
+          animation: toast-in 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes toast-in {
+          from { opacity: 0; transform: translateX(-50%) translateY(40px);}
+          to { opacity: 1; transform: translateX(-50%) translateY(0);}
+        }
+        .toast-anim.toast-out {
+          animation: toast-out 0.4s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        @keyframes toast-out {
+          from { opacity: 1; transform: translateX(-50%) translateY(0);}
+          to { opacity: 0; transform: translateX(-50%) translateY(40px);}
+        }
+      `}
+          </style>
+        </div>
+      )}
     </div>
   );
 }
