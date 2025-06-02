@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useState as useToastState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const IMAGES = [
   "WhatsApp Image 2025-06-02 at 16.20.28.jpeg",
@@ -237,6 +238,10 @@ export default function StickerGrid() {
     }
   };
 
+  function clearToast() {
+    setTimeout(() => setToast(null), 1500);
+  }
+
   return (
     <div
       ref={gridRef}
@@ -281,56 +286,37 @@ export default function StickerGrid() {
         ))}
       </div>
 
-      {toast && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 40,
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(255,255,255,0.95)",
-            color: "#18181b",
-            padding: "14px 32px",
-            borderRadius: 16,
-            fontSize: 17,
-            fontWeight: 500,
-            zIndex: 9999,
-            boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)",
-            border: "1px solid #e5e7eb",
-            backdropFilter: "blur(4px)",
-            pointerEvents: "none",
-            fontFamily: "DM Sans, sans-serif",
-            letterSpacing: "-0.01em",
-            opacity: toast ? 1 : 0,
-            transition:
-              "opacity 0.4s cubic-bezier(.4,0,.2,1), transform 0.4s cubic-bezier(.4,0,.2,1)",
-            transform: toast
-              ? "translateX(-50%) translateY(0)"
-              : "translateX(-50%) translateY(40px)",
-          }}
-          className="toast-anim"
-        >
-          {toast}
-          <style>
-            {`
-        .toast-anim {
-          animation: toast-in 0.3s cubic-bezier(.4,0,.2,1);
-        }
-        @keyframes toast-in {
-          from { opacity: 0; transform: translateX(-50%) translateY(40px);}
-          to { opacity: 1; transform: translateX(-50%) translateY(0);}
-        }
-        .toast-anim.toast-out {
-          animation: toast-out 0.4s cubic-bezier(.4,0,.2,1) forwards;
-        }
-        @keyframes toast-out {
-          from { opacity: 1; transform: translateX(-50%) translateY(0);}
-          to { opacity: 0; transform: translateX(-50%) translateY(40px);}
-        }
-      `}
-          </style>
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              position: "fixed",
+              bottom: 40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "rgba(255,255,255,0.95)",
+              color: "#18181b",
+              padding: "14px 32px",
+              borderRadius: 16,
+              fontSize: 17,
+              fontWeight: 500,
+              zIndex: 9999,
+              boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)",
+              border: "1px solid #e5e7eb",
+              backdropFilter: "blur(4px)",
+              pointerEvents: "none",
+              fontFamily: "DM Sans, sans-serif",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
